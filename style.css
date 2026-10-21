@@ -103,6 +103,16 @@ button {
   width: 100%;
 }
 
+#filtered-sources-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.filter-section {
+  margin-top: 15px;
+}
+
+
 @media (min-width: 600px) {
   button {
     width: auto;

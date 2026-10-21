@@ -30,6 +30,58 @@ const resSolar = document.getElementById('res-solar');
 const resBiomass = document.getElementById('res-biomass');
 const resBalance = document.getElementById('res-balance');
 
+const topSourceText = document.getElementById('top-source-text');
+const fossilVsGreenText = document.getElementById('fossil-vs-green-text');
+const mwThresholdInput = document.getElementById('mw-threshold');
+const filteredSourcesList = document.getElementById('filtered-sources-list');
+
+let currentSourcesData = [];
+
+function updateGridInsights(senData) {
+  currentSourcesData = [
+    { name: 'Coal', mw: senData.coal_mw, type: 'fossil' },
+    { name: 'Gas', mw: senData.gas_mw, type: 'fossil' },
+    { name: 'Nuclear', mw: senData.nuclear_mw, type: 'clean' },
+    { name: 'Hydro', mw: senData.hydro_mw, type: 'green' },
+    { name: 'Wind', mw: senData.wind_mw, type: 'green' },
+    { name: 'Solar', mw: senData.solar_mw, type: 'green' },
+    { name: 'Biomass', mw: senData.biomass_mw, type: 'green' }
+  ];
+
+  const topSource = [...currentSourcesData].sort((a, b) => b.mw - a.mw)[0];
+  topSourceText.textContent = `Top Production Source: ${topSource.name} (${topSource.mw.toFixed(2)} MW)`;
+
+  fossilVsGreenText.textContent = `Fossil Generation: ${senData.total_fossil_mw} MW | Green Generation: ${senData.total_green_mw} MW`;
+
+  fossilVsGreenText.innerHTML = `
+    Fossil Generation: <strong style="color: #b91c1c;">${senData.total_fossil_mw} MW</strong> | 
+    Green Generation: <strong style="color: #15803d;">${senData.total_green_mw} MW</strong>
+  `;
+
+  renderFilteredSources();
+}
+
+function renderFilteredSources() {
+  const threshold = parseFloat(mwThresholdInput.value) || 0;
+  filteredSourcesList.innerHTML = '';
+
+  const activeSources = currentSourcesData.filter(source => source.mw >= threshold);
+
+  if (activeSources.length === 0) {
+    filteredSourcesList.innerHTML = '<li>No energy sources exceed this threshold.</li>';
+    return;
+  }
+
+  activeSources.forEach(source => {
+    const li = document.createElement('li');
+    li.textContent = `${source.name}: ${source.mw.toFixed(2)} MW (${source.type.toUpperCase()})`;
+    filteredSourcesList.appendChild(li);
+  });
+}
+
+mwThresholdInput.addEventListener('input', renderFilteredSources);
+
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -216,6 +268,7 @@ function renderDashboard(data, intensity) {
   resBalance.textContent = `${data.balance_mw.toFixed(2)} MW`;
 
   showResults();
+  updateGridInsights(data);
 }
 
 function showError(msg) {
