@@ -52,25 +52,66 @@ form.addEventListener('submit', async (e) => {
 
 async function fetchGridHtml() {
   const targetUrl = 'https://www.sistemulenergetic.ro/';
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+  const encodedTargetUrl = encodeURIComponent(targetUrl);
+  const requests = [
+    {
+      url: targetUrl,
+      parse: response => response.text()
+    },
+    {
+      url: `https://proxy.corsfix.com/?${targetUrl}`,
+      parse: response => response.text()
+    },
+    {
+      url: `https://api.codetabs.com/v1/proxy?quest=${encodedTargetUrl}`,
+      parse: response => response.text()
+    },
+    {
+      url: `https://api.allorigins.win/get?url=${encodedTargetUrl}`,
+      parse: async response => {
+        const data = await response.json();
+        return data && data.contents;
+      }
+    }
+  ];
 
-  const response = await fetch(proxyUrl);
-  if (!response.ok) {
-    throw new Error(`Proxy error (HTTP ${response.status}).`);
+  const errors = [];
+
+  for (const request of requests) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const response = await fetch(request.url, {
+        signal: controller.signal,
+        headers: {
+          Accept: 'text/html, application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const html = await request.parse(response);
+      if (typeof html === 'string' && html.trim()) {
+        return html;
+      }
+
+      throw new Error('empty response');
+    } catch (error) {
+      errors.push(`${new URL(request.url).hostname}: ${error.name === 'AbortError' ? 'timeout' : error.message}`);
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
-  const data = await response.json();
-  if (!data || !data.contents) {
-    throw new Error('Received empty payload from grid proxy.');
-  }
-
-  return data.contents; 
+  throw new Error(`Unable to load grid data. ${errors.join(' | ')}`);
 }
 
 function parseNumber(value) {
   if (!value) return 0.0;
   
-  // Clean whitespace and special characters
   let cleaned = value.replace(/\u202f/g, '').replace(/\xa0/g, '').replace(/\s+/g, '');
   cleaned = cleaned.replace(/[^0-9,.-]/g, '');
 
