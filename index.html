@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>National Power Grid Monitor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <header class="app-header">
+      <h1>National Power Grid & Carbon Monitor</h1>
+      <p>Real-time energy generation, consumption, and carbon intensity</p>
+    </header>
+
+    <form id="fetch-form" class="card action-card">
+      <div class="info-group">
+        <span class="info-label">Source URL:</span>
+        <code class="source-url">https://www.sistemulenergetic.ro/</code>
+      </div>
+      <button type="submit" id="submit-btn">Fetch Grid Data</button>
+    </form>
+
+    <!-- Error Banner -->
+    <div id="error-message" class="error-banner hidden"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading-spinner hidden">
+      <div class="spinner"></div>
+      <p>Parsing live grid data...</p>
+    </div>
+
+    <!-- Grid Dashboard -->
+    <section id="results" class="results-container hidden">
+      <!-- Top Overview Metrics -->
+      <div class="metrics-grid">
+        <div class="card metric-card">
+          <span class="metric-label">Carbon Intensity</span>
+          <span class="metric-value highlight" id="res-carbon">--</span>
+          <span class="metric-unit">g CO₂ / kWh</span>
+        </div>
+
+        <div class="card metric-card">
+          <span class="metric-label">Total Production</span>
+          <span class="metric-value" id="res-production">--</span>
+          <span class="metric-unit">MW</span>
+        </div>
+
+        <div class="card metric-card">
+          <span class="metric-label">Total Consumption</span>
+          <span class="metric-value" id="res-consumption">--</span>
+          <span class="metric-unit">MW</span>
+        </div>
+
+        <div class="card metric-card">
+          <span class="metric-label">Green Energy Share</span>
+          <span class="metric-value" id="res-green-share">--</span>
+          <span class="metric-unit">%</span>
+        </div>
+      </div>
+
+      <!-- Detailed Breakdown -->
+      <div class="card details-card">
+        <div class="details-header">
+          <h2>Energy Mix Breakdown</h2>
+          <span class="timestamp-badge" id="res-timestamp">--</span>
+        </div>
+
+        <div class="breakdown-list">
+          <div class="breakdown-item">
+            <span> Coal</span>
+            <strong id="res-coal">0 MW</strong>
+          </div>
+          <div class="breakdown-item">
+            <span> Gas</span>
+            <strong id="res-gas">0 MW</strong>
+          </div>
+          <div class="breakdown-item">
+            <span> Nuclear</span>
+            <strong id="res-nuclear">0 MW</strong>
+          </div>
+          <div class="breakdown-item">
+            <span> Hydro</span>
+            <strong id="res-hydro">0 MW</strong>
+          </div>
+          <div class="breakdown-item">
+            <span> Wind</span>
+            <strong id="res-wind">0 MW</strong>
+          </div>
+          <div class="breakdown-item">
+            <span> Solar</span>
+            <strong id="res-solar">0 MW</strong>
+          </div>
+          <div class="breakdown-item">
+            <span> Biomass</span>
+            <strong id="res-biomass">0 MW</strong>
+          </div>
+          <div class="breakdown-item border-top">
+            <span> Grid Balance</span>
+            <strong id="res-balance">0 MW</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
