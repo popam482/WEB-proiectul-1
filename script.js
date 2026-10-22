@@ -80,6 +80,17 @@ function applyTheme(theme) {
   }
 }
 
+function updateSourceBar(elementId, valueMw, totalProductionMw) {
+  const barElement = document.getElementById(elementId);
+  if (!barElement) return;
+
+  const percentage = totalProductionMw > 0 
+    ? Math.min(100, Math.max(0, (valueMw / totalProductionMw) * 100)) 
+    : 0;
+
+  barElement.style.width = `${percentage.toFixed(1)}%`;
+}
+
 function renderBalanceWidget(balanceMw, consumptionMw) {
   if (!balanceBadge) return;
 
@@ -359,6 +370,15 @@ function renderDashboard(data, intensity) {
   resSolar.textContent = `${data.solar_mw.toFixed(2)} MW`;
   resBiomass.textContent = `${data.biomass_mw.toFixed(2)} MW`;
   resBalance.textContent = `${data.balance_mw.toFixed(2)} MW`;
+
+  const totalProd = data.production_mw;
+  updateSourceBar('bar-coal', data.coal_mw, totalProd);
+  updateSourceBar('bar-gas', data.gas_mw, totalProd);
+  updateSourceBar('bar-nuclear', data.nuclear_mw, totalProd);
+  updateSourceBar('bar-hydro', data.hydro_mw, totalProd);
+  updateSourceBar('bar-wind', data.wind_mw, totalProd);
+  updateSourceBar('bar-solar', data.solar_mw, totalProd);
+  updateSourceBar('bar-biomass', data.biomass_mw, totalProd);
 
   showResults();
   updateGridInsights(data);
