@@ -45,6 +45,41 @@ const balanceLeftLabel = document.getElementById('balance-left-label');
 const balanceRightLabel = document.getElementById('balance-right-label');
 const balanceBar = document.getElementById('balance-bar');
 
+
+//Theme toggle
+const themeToggleBtn = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+const themeText = document.getElementById('theme-text');
+
+const savedTheme = localStorage.getItem('theme');
+const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+  applyTheme('dark');
+} else {
+  applyTheme('light');
+}
+
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    const newTheme = isDark ? 'light' : 'dark';
+    
+    applyTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
+}
+
+function applyTheme(theme) {
+  if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+    if (themeText) themeText.textContent = 'Light';
+  } else {
+    document.body.classList.remove('dark-mode');
+    if (themeText) themeText.textContent = 'Dark';
+  }
+}
+
 function renderBalanceWidget(balanceMw, consumptionMw) {
   if (!balanceBadge) return;
 
