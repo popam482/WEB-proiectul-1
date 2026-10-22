@@ -113,6 +113,83 @@ button {
 }
 
 
+.balance-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balance-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.badge-export {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.badge-import {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.badge-neutral {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.balance-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.balance-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.balance-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.balance-description {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.balance-progress-container {
+  margin-top: 4px;
+}
+
+.balance-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.bar-export {
+  background-color: #10b981;
+}
+
+.bar-import {
+  background-color: #ef4444;
+}
+
 @media (min-width: 600px) {
   button {
     width: auto;

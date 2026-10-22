@@ -37,6 +37,64 @@ const filteredSourcesList = document.getElementById('filtered-sources-list');
 
 let currentSourcesData = [];
 
+const balanceBadge = document.getElementById('balance-badge');
+const balanceIcon = document.getElementById('balance-icon');
+const balanceStatusText = document.getElementById('balance-status-text');
+const balanceSubtext = document.getElementById('balance-subtext');
+const balanceLeftLabel = document.getElementById('balance-left-label');
+const balanceRightLabel = document.getElementById('balance-right-label');
+const balanceBar = document.getElementById('balance-bar');
+
+function renderBalanceWidget(balanceMw, consumptionMw) {
+  if (!balanceBadge) return;
+
+  const absBalance = Math.abs(balanceMw).toFixed(2);
+  
+  const percentageOfConsumption = consumptionMw > 0 
+    ? ((Math.abs(balanceMw) / consumptionMw) * 100).toFixed(1) 
+    : 0;
+
+  if (balanceMw > 0) {
+    balanceBadge.textContent = 'EXPORT';
+    balanceBadge.className = 'balance-badge badge-export';
+    balanceIcon.textContent = 'Export';
+    balanceStatusText.textContent = `Export of ${absBalance} MW`;
+    balanceSubtext.textContent = `Romania is injecting energy into neighboring grids (equivalent to ${percentageOfConsumption}% of national consumption).`;
+    
+    balanceLeftLabel.textContent = 'Domestic Consumption Coverage';
+    balanceRightLabel.textContent = '100% + Surplus';
+    
+    balanceBar.className = 'progress-bar bar-export';
+    balanceBar.style.width = '100%';
+
+  } else if (balanceMw < 0) {
+    balanceBadge.textContent = 'IMPORT';
+    balanceBadge.className = 'balance-badge badge-import';
+    balanceIcon.textContent = 'Import';
+    balanceStatusText.textContent = `Import of ${absBalance} MW`;
+    balanceSubtext.textContent = `The system relies on neighboring grids to cover ${percentageOfConsumption}% of current consumption.`;
+
+    const coveragePercent = Math.max(0, 100 - percentageOfConsumption).toFixed(1);
+    balanceLeftLabel.textContent = 'National Production vs. Consumption';
+    balanceRightLabel.textContent = `${coveragePercent}% Domestically Covered`;
+
+    balanceBar.className = 'progress-bar bar-import';
+    balanceBar.style.width = `${coveragePercent}%`;
+
+  } else {
+    balanceBadge.textContent = 'BALANCE';
+    balanceBadge.className = 'balance-badge badge-neutral';
+    balanceIcon.textContent = 'Balance';
+    balanceStatusText.textContent = 'Neutral Balance (0 MW)';
+    balanceSubtext.textContent = 'National production exactly covers domestic consumption.';
+
+    balanceLeftLabel.textContent = 'Internal Consumption Coverage';
+    balanceRightLabel.textContent = '100%';
+
+    balanceBar.className = 'progress-bar';
+    balanceBar.style.width = '100%';
+  }
+}
 function updateGridInsights(senData) {
   currentSourcesData = [
     { name: 'Coal', mw: senData.coal_mw, type: 'fossil' },
@@ -269,6 +327,7 @@ function renderDashboard(data, intensity) {
 
   showResults();
   updateGridInsights(data);
+  renderBalanceWidget(data.balance_mw, data.consumption_mw);
 }
 
 function showError(msg) {
