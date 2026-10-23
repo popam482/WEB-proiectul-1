@@ -186,9 +186,11 @@ function renderFilteredSources() {
 mwThresholdInput.addEventListener('input', renderFilteredSources);
 
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+  loadGridData();
+});
 
+async function loadGridData() {
   hideError();
   hideResults();
   showLoading();
@@ -204,7 +206,7 @@ form.addEventListener('submit', async (e) => {
   } finally {
     hideLoading();
   }
-});
+}
 
 async function fetchGridHtml() {
   const targetUrl = 'https://www.sistemulenergetic.ro/';

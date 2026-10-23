@@ -139,7 +139,7 @@ body {
 .bar-nuclear { background-color: #a855f7; } /* Violet (Nuclear) */
 .bar-hydro { background-color: #0284c7; }   /* Blue (Hydro) */
 .bar-wind { background-color: #62cee2; }    /* Cyan (Wind) */
-.bar-solar { background-color: #eab308; }   /* Yellow (Solar) */
+.bar-solar { background-color: #ebff11; }   /* Yellow (Solar) */
 .bar-biomass { background-color: #22c55e; } /* Green (Biomass) */
 
 @media (min-width: 600px) {
