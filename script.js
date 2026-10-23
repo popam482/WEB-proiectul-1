@@ -45,6 +45,10 @@ const balanceLeftLabel = document.getElementById('balance-left-label');
 const balanceRightLabel = document.getElementById('balance-right-label');
 const balanceBar = document.getElementById('balance-bar');
 
+//advisor elements
+const advisorBadge = document.getElementById('advisor-badge');
+const advisorTitle = document.getElementById('advisor-title');
+const advisorDescription = document.getElementById('advisor-description');
 
 //Theme toggle
 const themeToggleBtn = document.getElementById('theme-toggle');
@@ -103,19 +107,42 @@ async function fetchExchangeRate() {
 }
 
 async function fetchOpcomEnergyPrice() {
-  try {
-    const response = await fetch('https://api.energy-charts.info/price?country=ro');
-    if (!response.ok) return 100.0; 
-    const data = await response.json();
-    
-    if (data && data.price && data.price.length > 0) {
-      const latestPrice = data.price[data.price.length - 1];
-      return latestPrice || 100.0;
+  const targetUrl = 'https://api.energy-charts.info/price?country=ro';
+  const encodedTargetUrl = encodeURIComponent(targetUrl);
+  const requests = [
+    {
+      url: targetUrl,
+      parse: response => response.json()
+    },
+    {
+      url: `https://corsproxy.io/?url=${encodedTargetUrl}`,
+      parse: response => response.json()
+    },
+    {
+      url: `https://api.codetabs.com/v1/proxy?quest=${encodedTargetUrl}`,
+      parse: response => response.json()
     }
-    return 100.0;
-  } catch (err) {
-    return 100.0; 
+  ];
+
+  for (const request of requests) {
+    try {
+      const response = await fetch(request.url);
+      if (!response.ok) continue;
+
+      const result = await request.parse(response);
+      const data = typeof result === 'string' ? JSON.parse(result) : result;
+      if (data && Array.isArray(data.price)) {
+        const validPrices = data.price.filter(price => price !== null && price !== undefined);
+        if (validPrices.length > 0) {
+          return validPrices[validPrices.length - 1];
+        }
+      }
+    } catch (error) {
+      // Try the next CORS-enabled endpoint.
+    }
   }
+
+  return 100.0;
 }
 
 function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3, energyPriceEuro=100.0) {
@@ -137,7 +164,7 @@ function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3, energyPric
     balanceBadge.className = 'balance-badge badge-export';
     balanceIcon.textContent = 'Export';
     balanceStatusText.textContent = `Export of ${absBalance} MW (~${formattedRon} RON/h)`;
-    balanceSubtext.textContent = `Romania is exporting energy (~${percentageOfConsumption}% of consumption). Estimated value: ${formattedRon} RON/h (at 1 EUR = ${euroToRon.toFixed(2)} RON via Exchange API).`;
+    balanceSubtext.textContent = `Romania is exporting energy (~${percentageOfConsumption}% of consumption). Estimated value: ${formattedRon} RON/h (at 1 EUR = ${euroToRon.toFixed(2)} RON).`;
     
     balanceLeftLabel.textContent = 'Domestic Consumption Coverage';
     balanceRightLabel.textContent = '100% + Surplus';
@@ -150,7 +177,7 @@ function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3, energyPric
     balanceBadge.className = 'balance-badge badge-import';
     balanceIcon.textContent = 'Import';
     balanceStatusText.textContent = `Import of ${absBalance} MW (~${formattedRon} RON/h)`;
-    balanceSubtext.textContent = `The grid imports ${percentageOfConsumption}% of consumption. Estimated cost: ${formattedRon} RON/h (at 1 EUR = ${euroToRon.toFixed(2)} RON via Exchange API).`;
+    balanceSubtext.textContent = `The grid imports ${percentageOfConsumption}% of consumption. Estimated cost: ${formattedRon} RON/h (at 1 EUR = ${euroToRon.toFixed(2)} RON).`;
 
     const coveragePercent = Math.max(0, 100 - percentageOfConsumption).toFixed(1);
     balanceLeftLabel.textContent = 'National Production vs. Consumption';
@@ -215,6 +242,31 @@ function renderFilteredSources() {
   });
 }
 
+
+function updateConsumptionAdvisor(senData, carbonIntensity) {
+  if (!advisorBadge || !advisorTitle || !advisorDescription) return;
+
+  const isLowCarbon = carbonIntensity < 220;
+  const isHighGreen = senData.green_share_percent >= 45;
+  const isSurplus = senData.balance_mw >= 0;
+  if (isLowCarbon && isHighGreen) {
+    advisorBadge.textContent = 'RECOMMENDED';
+    advisorBadge.className = 'balance-badge badge-export';
+    advisorTitle.textContent = 'Great time to use energy!';
+    advisorDescription.textContent = `The national grid currently has a low carbon intensity (${carbonIntensity} g CO₂/kWh) and a high share of renewable energy (${senData.green_share_percent}%). It is an optimal window for running high-energy appliances or charging devices.`;
+  } else if (!isLowCarbon && senData.green_share_percent < 30) {
+    advisorBadge.textContent = 'NOT RECOMMENDED';
+    advisorBadge.className = 'balance-badge badge-import';
+    advisorTitle.textContent = 'Avoid heavy energy consumption!';
+    advisorDescription.textContent = `Grid emissions are elevated (${carbonIntensity} g CO₂/kWh) and green energy generation is low (${senData.green_share_percent}%). Consider postponing heavy energy usage if possible.`;
+  } else {
+    advisorBadge.textContent = 'MODERATE';
+    advisorBadge.className = 'balance-badge badge-neutral';
+    advisorTitle.textContent = 'Moderate grid impact';
+    advisorDescription.textContent = `The power grid is operating at average carbon levels (${carbonIntensity} g CO₂/kWh) with a ${senData.green_share_percent}% green share. Consumption impact is neutral.`;
+  }
+}
+
 mwThresholdInput.addEventListener('input', renderFilteredSources);
 
 
@@ -250,11 +302,7 @@ async function fetchGridHtml() {
   const encodedTargetUrl = encodeURIComponent(targetUrl);
   const requests = [
     {
-      url: targetUrl,
-      parse: response => response.text()
-    },
-    {
-      url: `https://proxy.corsfix.com/?${targetUrl}`,
+      url: `https://corsproxy.io/?url=${encodedTargetUrl}`,
       parse: response => response.text()
     },
     {
@@ -262,11 +310,8 @@ async function fetchGridHtml() {
       parse: response => response.text()
     },
     {
-      url: `https://api.allorigins.win/get?url=${encodedTargetUrl}`,
-      parse: async response => {
-        const data = await response.json();
-        return data && data.contents;
-      }
+      url: `https://proxy.corsfix.com/?${targetUrl}`,
+      parse: response => response.text()
     }
   ];
 
@@ -422,6 +467,7 @@ function renderDashboard(data, intensity, euroToRon=5.3, energyPriceEuro=100.0) 
   showResults();
   updateGridInsights(data);
   renderBalanceWidget(data.balance_mw, data.consumption_mw, euroToRon, energyPriceEuro);
+  updateConsumptionAdvisor(data, intensity);
 }
 
 function showError(msg) {

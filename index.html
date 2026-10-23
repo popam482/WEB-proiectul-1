@@ -9,15 +9,15 @@
 <body>
   <main class="container">
     <header class="app-header">
-      <h1>National Power Grid & Carbon Monitor</h1>
+      <div >
+        <h1>National Power Grid & Carbon Monitor</h1>
+      </div>
       <p>Real-time energy generation, consumption, and carbon intensity</p>
       <button type="button" id="theme-toggle" class="theme-toggle-btn">
-      <span id="theme-text">Dark</span>
-    </button>
-  </div>
-  <p>Real-time energy generation, consumption, and carbon intensity</p>
-</header>
+          <span id="theme-text">Dark</span>
+      </button>
     </header>
+
     <!-- Error Banner -->
     <div id="error-message" class="error-banner hidden"></div>
 
@@ -56,30 +56,31 @@
         </div>
       </div>
 
+      <!-- Balance Widget -->
       <div id="balance-widget" class="card balance-card">
-      <div class="balance-header">
-        <span class="info-label">Balance</span>
-        <span id="balance-badge" class="balance-badge">--</span>
-      </div>
-      
-      <div class="balance-main">
-        <div id="balance-icon" class="balance-icon">Refresh</div>
-        <div class="balance-info">
-          <div id="balance-status-text" class="balance-title">Processing...</div>
-          <div id="balance-subtext" class="balance-description">Fetching data from the grid</div>
+        <div class="balance-header">
+          <span class="info-label">Balance</span>
+          <span id="balance-badge" class="balance-badge">--</span>
+        </div>
+        
+        <div class="balance-main">
+          <div id="balance-icon" class="balance-icon">🔄</div>
+          <div class="balance-info">
+            <div id="balance-status-text" class="balance-title">Processing...</div>
+            <div id="balance-subtext" class="balance-description">Fetching data from the grid</div>
+          </div>
+        </div>
+
+        <div class="balance-progress-container">
+          <div class="balance-progress-labels">
+            <span id="balance-left-label">Internal Production</span>
+            <span id="balance-right-label">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div id="balance-bar" class="progress-bar"></div>
+          </div>
         </div>
       </div>
-
-      <div class="balance-progress-container">
-    <div class="balance-progress-labels">
-      <span id="balance-left-label">Internal Production</span>
-      <span id="balance-right-label">0%</span>
-    </div>
-    <div class="progress-bar-bg">
-      <div id="balance-bar" class="progress-bar"></div>
-    </div>
-  </div>
-  </div>
 
       <!-- Detailed Breakdown -->
       <div class="card details-card">
@@ -89,92 +90,106 @@
         </div>
 
         <div class="breakdown-list">
-  <div class="breakdown-item-wrapper">
-    <div class="breakdown-item">
-      <span>Coal</span>
-      <strong id="res-coal">0 MW</strong>
-    </div>
-    <div class="progress-bar-bg">
-      <div id="bar-coal" class="progress-bar bar-coal"></div>
-    </div>
-  </div>
+          <div class="breakdown-item-wrapper">
+            <div class="breakdown-item">
+              <span>Coal</span>
+              <strong id="res-coal">0 MW</strong>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="bar-coal" class="progress-bar bar-coal"></div>
+            </div>
+          </div>
 
-  <div class="breakdown-item-wrapper">
-    <div class="breakdown-item">
-      <span>Gas</span>
-      <strong id="res-gas">0 MW</strong>
-    </div>
-    <div class="progress-bar-bg">
-      <div id="bar-gas" class="progress-bar bar-gas"></div>
-    </div>
-  </div>
+          <div class="breakdown-item-wrapper">
+            <div class="breakdown-item">
+              <span>Gas</span>
+              <strong id="res-gas">0 MW</strong>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="bar-gas" class="progress-bar bar-gas"></div>
+            </div>
+          </div>
 
-  <div class="breakdown-item-wrapper">
-    <div class="breakdown-item">
-      <span>Nuclear</span>
-      <strong id="res-nuclear">0 MW</strong>
-    </div>
-    <div class="progress-bar-bg">
-      <div id="bar-nuclear" class="progress-bar bar-nuclear"></div>
-    </div>
-  </div>
+          <div class="breakdown-item-wrapper">
+            <div class="breakdown-item">
+              <span>Nuclear</span>
+              <strong id="res-nuclear">0 MW</strong>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="bar-nuclear" class="progress-bar bar-nuclear"></div>
+            </div>
+          </div>
 
-  <div class="breakdown-item-wrapper">
-    <div class="breakdown-item">
-      <span>Hydro</span>
-      <strong id="res-hydro">0 MW</strong>
-    </div>
-    <div class="progress-bar-bg">
-      <div id="bar-hydro" class="progress-bar bar-hydro"></div>
-    </div>
-  </div>
+          <div class="breakdown-item-wrapper">
+            <div class="breakdown-item">
+              <span>Hydro</span>
+              <strong id="res-hydro">0 MW</strong>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="bar-hydro" class="progress-bar bar-hydro"></div>
+            </div>
+          </div>
 
-  <div class="breakdown-item-wrapper">
-    <div class="breakdown-item">
-      <span>Wind</span>
-      <strong id="res-wind">0 MW</strong>
-    </div>
-    <div class="progress-bar-bg">
-      <div id="bar-wind" class="progress-bar bar-wind"></div>
-    </div>
-  </div>
+          <div class="breakdown-item-wrapper">
+            <div class="breakdown-item">
+              <span>Wind</span>
+              <strong id="res-wind">0 MW</strong>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="bar-wind" class="progress-bar bar-wind"></div>
+            </div>
+          </div>
 
-    <div class="breakdown-item-wrapper">
-      <div class="breakdown-item">
-        <span>Solar</span>
-        <strong id="res-solar">0 MW</strong>
+          <div class="breakdown-item-wrapper">
+            <div class="breakdown-item">
+              <span>Solar</span>
+              <strong id="res-solar">0 MW</strong>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="bar-solar" class="progress-bar bar-solar"></div>
+            </div>
+          </div>
+
+          <div class="breakdown-item-wrapper">
+            <div class="breakdown-item">
+              <span>Biomass</span>
+              <strong id="res-biomass">0 MW</strong>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="bar-biomass" class="progress-bar bar-biomass"></div>
+            </div>
+          </div>
+
+          <div class="breakdown-item border-top">
+            <span>Grid Balance</span>
+            <strong id="res-balance">0 MW</strong>
+          </div>
+        </div>
       </div>
-      <div class="progress-bar-bg">
-        <div id="bar-solar" class="progress-bar bar-solar"></div>
-      </div>
-    </div>
 
-    <div class="breakdown-item-wrapper">
-      <div class="breakdown-item">
-        <span>Biomass</span>
-        <strong id="res-biomass">0 MW</strong>
-      </div>
-      <div class="progress-bar-bg">
-        <div id="bar-biomass" class="progress-bar bar-biomass"></div>
-      </div>
-    </div>
-
-    <div class="breakdown-item border-top">
-      <span>Grid Balance</span>
-      <strong id="res-balance">0 MW</strong>
-    </div>
-  </div>
-      </div>
+      <!-- Grid Insights & Filter -->
       <div class="card" style="margin-top: 20px;">
         <h2>Grid Insights & Filter</h2>
         <p id="top-source-text">Top Production Source: --</p>
         <p id="fossil-vs-green-text">Fossil vs Green Ratio: --</p>
 
-      <div class="filter-section">
-        <label for="mw-threshold">Filter sources producing more than (MW):</label>
-        <input type="number" id="mw-threshold" value="500" step="100">
-      </div>
+        <div class="filter-section">
+          <label for="mw-threshold">Filter sources producing more than (MW):</label>
+          <input type="number" id="mw-threshold" value="500" step="100">
+        </div>
         <ul id="filtered-sources-list"></ul>
+      </div>
+
+      <!-- Smart Consumption Advisor Card -->
+      <div class="card" style="margin-top: 20px;">
+        <h2>Smart Consumption Advisor</h2>
+        <div class="smart-consumption-section">
+          <span id="advisor-badge" class="balance-badge badge-neutral">MODERATE</span>
+          <strong id="advisor-title">Calculating grid state...</strong>
+        </div>
+        <p id="advisor-description" class="advisor-description">
+          Analyzing carbon intensity, green share, and overall system load...
+        </p>
       </div>
     </section>
   </main>
