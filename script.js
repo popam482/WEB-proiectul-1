@@ -102,7 +102,23 @@ async function fetchExchangeRate() {
   }
 }
 
-function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3) {
+async function fetchOpcomEnergyPrice() {
+  try {
+    const response = await fetch('https://api.energy-charts.info/price?country=ro');
+    if (!response.ok) return 100.0; 
+    const data = await response.json();
+    
+    if (data && data.price && data.price.length > 0) {
+      const latestPrice = data.price[data.price.length - 1];
+      return latestPrice || 100.0;
+    }
+    return 100.0;
+  } catch (err) {
+    return 100.0; 
+  }
+}
+
+function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3, energyPriceEuro=100.0) {
   if (!balanceBadge) return;
 
   const absBalance = Math.abs(balanceMw).toFixed(2);
@@ -111,8 +127,7 @@ function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3) {
     ? ((Math.abs(balanceMw) / consumptionMw) * 100).toFixed(1) 
     : 0;
 
-  const SPOT_PRICE_EUR_MWH = 100; 
-  const hourlyFinancialValueEur = absBalance * SPOT_PRICE_EUR_MWH;
+  const hourlyFinancialValueEur = absBalance * energyPriceEuro;
   const hourlyFinancialValueRon = hourlyFinancialValueEur * euroToRon;
 
   const formattedRon = hourlyFinancialValueRon.toLocaleString('ro-RO', { maximumFractionDigits: 0 });
@@ -213,15 +228,16 @@ async function loadGridData() {
   showLoading();
 
   try {
-    const [rawHtml, euroToRon] = await Promise.all([
+    const [rawHtml, euroToRon, energyPriceEuro] = await Promise.all([
       fetchGridHtml(),
-      fetchExchangeRate()
+      fetchExchangeRate(),
+      fetchOpcomEnergyPrice()
     ]);
 
     const senData = parseSenHtml(rawHtml);
     const carbonIntensity = calculateGridCarbonIntensity(senData);
 
-    renderDashboard(senData, carbonIntensity, euroToRon);
+    renderDashboard(senData, carbonIntensity, euroToRon, energyPriceEuro);
   } catch (err) {
     showError(err.message || 'An unexpected error occurred while processing grid data.');
   } finally {
@@ -378,7 +394,7 @@ function calculateGridCarbonIntensity(senData) {
   return Number(intensity.toFixed(2));
 }
 
-function renderDashboard(data, intensity, euroToRon=5.3) {
+function renderDashboard(data, intensity, euroToRon=5.3, energyPriceEuro=100.0) {
   resCarbon.textContent = intensity;
   resProduction.textContent = data.production_mw;
   resConsumption.textContent = data.consumption_mw;
@@ -405,7 +421,7 @@ function renderDashboard(data, intensity, euroToRon=5.3) {
 
   showResults();
   updateGridInsights(data);
-  renderBalanceWidget(data.balance_mw, data.consumption_mw, euroToRon);
+  renderBalanceWidget(data.balance_mw, data.consumption_mw, euroToRon, energyPriceEuro);
 }
 
 function showError(msg) {
