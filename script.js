@@ -91,7 +91,18 @@ function updateSourceBar(elementId, valueMw, totalProductionMw) {
   barElement.style.width = `${percentage.toFixed(1)}%`;
 }
 
-function renderBalanceWidget(balanceMw, consumptionMw) {
+async function fetchExchangeRate() {
+  try {
+    const response = await fetch('https://api.exchangerate-api.com/v4/latest/EUR');
+    if (!response.ok) return 5.3; 
+    const data = await response.json();
+    return data.rates.RON || 5.3;
+  } catch (err) {
+    return 5.3; 
+  }
+}
+
+function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3) {
   if (!balanceBadge) return;
 
   const absBalance = Math.abs(balanceMw).toFixed(2);
@@ -100,12 +111,18 @@ function renderBalanceWidget(balanceMw, consumptionMw) {
     ? ((Math.abs(balanceMw) / consumptionMw) * 100).toFixed(1) 
     : 0;
 
-  if (balanceMw > 0) {
+  const SPOT_PRICE_EUR_MWH = 100; 
+  const hourlyFinancialValueEur = absBalance * SPOT_PRICE_EUR_MWH;
+  const hourlyFinancialValueRon = hourlyFinancialValueEur * euroToRon;
+
+  const formattedRon = hourlyFinancialValueRon.toLocaleString('ro-RO', { maximumFractionDigits: 0 });
+
+ if (balanceMw > 0) {
     balanceBadge.textContent = 'EXPORT';
     balanceBadge.className = 'balance-badge badge-export';
     balanceIcon.textContent = 'Export';
-    balanceStatusText.textContent = `Export of ${absBalance} MW`;
-    balanceSubtext.textContent = `Romania is injecting energy into neighboring grids (equivalent to ${percentageOfConsumption}% of national consumption).`;
+    balanceStatusText.textContent = `Export of ${absBalance} MW (~${formattedRon} RON/h)`;
+    balanceSubtext.textContent = `Romania is exporting energy (~${percentageOfConsumption}% of consumption). Estimated value: ${formattedRon} RON/h (at 1 EUR = ${euroToRon.toFixed(2)} RON via Exchange API).`;
     
     balanceLeftLabel.textContent = 'Domestic Consumption Coverage';
     balanceRightLabel.textContent = '100% + Surplus';
@@ -117,8 +134,8 @@ function renderBalanceWidget(balanceMw, consumptionMw) {
     balanceBadge.textContent = 'IMPORT';
     balanceBadge.className = 'balance-badge badge-import';
     balanceIcon.textContent = 'Import';
-    balanceStatusText.textContent = `Import of ${absBalance} MW`;
-    balanceSubtext.textContent = `The system relies on neighboring grids to cover ${percentageOfConsumption}% of current consumption.`;
+    balanceStatusText.textContent = `Import of ${absBalance} MW (~${formattedRon} RON/h)`;
+    balanceSubtext.textContent = `The grid imports ${percentageOfConsumption}% of consumption. Estimated cost: ${formattedRon} RON/h (at 1 EUR = ${euroToRon.toFixed(2)} RON via Exchange API).`;
 
     const coveragePercent = Math.max(0, 100 - percentageOfConsumption).toFixed(1);
     balanceLeftLabel.textContent = 'National Production vs. Consumption';
@@ -196,11 +213,15 @@ async function loadGridData() {
   showLoading();
 
   try {
-    const rawHtml = await fetchGridHtml();
+    const [rawHtml, euroToRon] = await Promise.all([
+      fetchGridHtml(),
+      fetchExchangeRate()
+    ]);
+
     const senData = parseSenHtml(rawHtml);
     const carbonIntensity = calculateGridCarbonIntensity(senData);
 
-    renderDashboard(senData, carbonIntensity);
+    renderDashboard(senData, carbonIntensity, euroToRon);
   } catch (err) {
     showError(err.message || 'An unexpected error occurred while processing grid data.');
   } finally {
@@ -357,7 +378,7 @@ function calculateGridCarbonIntensity(senData) {
   return Number(intensity.toFixed(2));
 }
 
-function renderDashboard(data, intensity) {
+function renderDashboard(data, intensity, euroToRon=5.3) {
   resCarbon.textContent = intensity;
   resProduction.textContent = data.production_mw;
   resConsumption.textContent = data.consumption_mw;
@@ -384,7 +405,7 @@ function renderDashboard(data, intensity) {
 
   showResults();
   updateGridInsights(data);
-  renderBalanceWidget(data.balance_mw, data.consumption_mw);
+  renderBalanceWidget(data.balance_mw, data.consumption_mw, euroToRon);
 }
 
 function showError(msg) {
