@@ -50,6 +50,10 @@ const advisorBadge = document.getElementById('advisor-badge');
 const advisorTitle = document.getElementById('advisor-title');
 const advisorDescription = document.getElementById('advisor-description');
 
+// filter and sort 
+const categoryFilterSelect = document.getElementById('category-filter');
+const sortOrderSelect = document.getElementById('sort-order');
+
 //Theme toggle
 const themeToggleBtn = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
@@ -201,43 +205,84 @@ function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3, energyPric
   }
 }
 function updateGridInsights(senData) {
+
   currentSourcesData = [
-    { name: 'Coal', mw: senData.coal_mw, type: 'fossil' },
-    { name: 'Gas', mw: senData.gas_mw, type: 'fossil' },
-    { name: 'Nuclear', mw: senData.nuclear_mw, type: 'clean' },
-    { name: 'Hydro', mw: senData.hydro_mw, type: 'green' },
-    { name: 'Wind', mw: senData.wind_mw, type: 'green' },
-    { name: 'Solar', mw: senData.solar_mw, type: 'green' },
-    { name: 'Biomass', mw: senData.biomass_mw, type: 'green' }
-  ];
+    { name: 'Coal', mw: senData.coal_mw, type: 'fossil', factor: EMISSION_FACTORS.coal },
+    { name: 'Gas', mw: senData.gas_mw, type: 'fossil', factor: EMISSION_FACTORS.gas },
+    { name: 'Nuclear', mw: senData.nuclear_mw, type: 'clean', factor: EMISSION_FACTORS.nuclear },
+    { name: 'Hydro', mw: senData.hydro_mw, type: 'green', factor: EMISSION_FACTORS.hydro },
+    { name: 'Wind', mw: senData.wind_mw, type: 'green', factor: EMISSION_FACTORS.wind },
+    { name: 'Solar', mw: senData.solar_mw, type: 'green', factor: EMISSION_FACTORS.solar },
+    { name: 'Biomass', mw: senData.biomass_mw, type: 'green', factor: EMISSION_FACTORS.biomass }
+  ].map(source => ({
+    ...source,
+    co2TonsPerHour: (source.mw * source.factor) / 1000
+  }));
 
   const topSource = [...currentSourcesData].sort((a, b) => b.mw - a.mw)[0];
-  topSourceText.textContent = `Top Production Source: ${topSource.name} (${topSource.mw.toFixed(2)} MW)`;
+  if (topSourceText) {
+    topSourceText.textContent = `Top Production Source: ${topSource.name} (${topSource.mw.toFixed(2)} MW)`;
+  }
 
-  fossilVsGreenText.textContent = `Fossil Generation: ${senData.total_fossil_mw} MW | Green Generation: ${senData.total_green_mw} MW`;
-
-  fossilVsGreenText.innerHTML = `
-    Fossil Generation: <strong style="color: #b91c1c;">${senData.total_fossil_mw} MW</strong> | 
-    Green Generation: <strong style="color: #15803d;">${senData.total_green_mw} MW</strong>
-  `;
+  if (fossilVsGreenText) {
+    fossilVsGreenText.innerHTML = `
+      Fossil: <strong style="color: #b91c1c;">${senData.total_fossil_mw} MW</strong> | 
+      Green: <strong style="color: #15803d;">${senData.total_green_mw} MW</strong>
+    `;
+  }
 
   renderFilteredSources();
 }
 
 function renderFilteredSources() {
+  if (!filteredSourcesList) return;
+
   const threshold = parseFloat(mwThresholdInput.value) || 0;
+  const selectedCategory = categoryFilterSelect ? categoryFilterSelect.value : 'all';
+  const selectedSort = sortOrderSelect ? sortOrderSelect.value : 'mw-desc';
+
   filteredSourcesList.innerHTML = '';
 
-  const activeSources = currentSourcesData.filter(source => source.mw >= threshold);
+  let filtered = currentSourcesData.filter(source => {
+    const passesMw = source.mw >= threshold;
+    let passesCategory = true;
 
-  if (activeSources.length === 0) {
-    filteredSourcesList.innerHTML = '<li>No energy sources exceed this threshold.</li>';
+    if (selectedCategory === 'green') passesCategory = source.type === 'green';
+    else if (selectedCategory === 'fossil') passesCategory = source.type === 'fossil';
+    else if (selectedCategory === 'clean') passesCategory = (source.type === 'green' || source.type === 'clean');
+
+    return passesMw && passesCategory;
+  });
+
+  if (selectedSort === 'mw-desc') {
+    filtered.sort((a, b) => b.mw - a.mw);
+  } else if (selectedSort === 'mw-asc') {
+    filtered.sort((a, b) => a.mw - b.mw);
+  } else if (selectedSort === 'emissions-desc') {
+    filtered.sort((a, b) => b.co2TonsPerHour - a.co2TonsPerHour);
+  }
+
+  if (filtered.length === 0) {
+    filteredSourcesList.innerHTML = '<li style="color: var(--text-muted); font-size: 0.9rem;">No energy sources match the selected criteria.</li>';
     return;
   }
 
-  activeSources.forEach(source => {
+  filtered.forEach(source => {
     const li = document.createElement('li');
-    li.textContent = `${source.name}: ${source.mw.toFixed(2)} MW (${source.type.toUpperCase()})`;
+    li.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--badge-bg); border-radius: 6px; font-size: 0.88rem;';
+
+    const typeBadgeColor = source.type === 'fossil' ? '#b91c1c' : (source.type === 'green' ? '#15803d' : '#0284c7');
+
+    li.innerHTML = `
+      <div>
+        <strong>${source.name}</strong> 
+        <span style="font-size: 0.75rem; color: ${typeBadgeColor}; font-weight: 700; margin-left: 6px;">[${source.type.toUpperCase()}]</span>
+      </div>
+      <div>
+        <strong>${source.mw.toFixed(2)} MW</strong>
+        <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 8px;">(~${source.co2TonsPerHour.toFixed(1)} t CO₂/h)</span>
+      </div>
+    `;
     filteredSourcesList.appendChild(li);
   });
 }
@@ -494,3 +539,6 @@ function showResults() {
 function hideResults() {
   resultsContainer.classList.add('hidden');
 }
+
+if (categoryFilterSelect) categoryFilterSelect.addEventListener('change', renderFilteredSources);
+if (sortOrderSelect) sortOrderSelect.addEventListener('change', renderFilteredSources);

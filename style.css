@@ -38,41 +38,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.theme-toggle-btn {
-  background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 8px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-  width: auto;
-}
-
-.theme-toggle-btn:hover {
-  background-color: var(--badge-bg);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-}
-
-body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  padding: 24px 16px;
-  display: flex;
-  justify-content: center;
-}
-
 .container {
   width: 100%;
   max-width: 800px;
@@ -94,6 +59,26 @@ body {
   font-size: 0.95rem;
 }
 
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  width: auto;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--badge-bg);
+}
+
 .card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -109,7 +94,6 @@ body {
   gap: 16px;
   align-items: center;
 }
-
 
 /* Progress Bars */
 .breakdown-item-wrapper {
@@ -133,21 +117,13 @@ body {
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-
-.bar-coal { background-color: #64748b; }    /* Grey (Coal) */
-.bar-gas { background-color: #f97316; }     /* Orange (Gas) */
-.bar-nuclear { background-color: #a855f7; } /* Violet (Nuclear) */
-.bar-hydro { background-color: #0284c7; }   /* Blue (Hydro) */
-.bar-wind { background-color: #62cee2; }    /* Cyan (Wind) */
-.bar-solar { background-color: #ebff11; }   /* Yellow (Solar) */
-.bar-biomass { background-color: #22c55e; } /* Green (Biomass) */
-
-@media (min-width: 600px) {
-  .action-card {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
+.bar-coal { background-color: #64748b; }
+.bar-gas { background-color: #f97316; }
+.bar-nuclear { background-color: #a855f7; }
+.bar-hydro { background-color: #0284c7; }
+.bar-wind { background-color: #06b6d4; }
+.bar-solar { background-color: #eab308; }
+.bar-biomass { background-color: #22c55e; }
 
 .info-group {
   display: flex;
@@ -163,11 +139,11 @@ body {
 }
 
 .source-url {
-  background: #f1f5f9;
+  background: var(--badge-bg);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.85rem;
-  color: #334155;
+  color: var(--text-main);
 }
 
 button {
@@ -183,15 +159,9 @@ button {
   width: 100%;
 }
 
-#filtered-sources-list {
-  margin-top: 10px;
-  padding-left: 20px;
+button:hover {
+  background-color: var(--primary-hover);
 }
-
-.filter-section {
-  margin-top: 15px;
-}
-
 
 .balance-card {
   display: flex;
@@ -224,8 +194,8 @@ button {
 }
 
 .badge-neutral {
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: var(--badge-bg);
+  color: var(--text-muted);
 }
 
 .balance-main {
@@ -262,13 +232,8 @@ button {
   margin-bottom: 4px;
 }
 
-.bar-export {
-  background-color: #10b981;
-}
-
-.bar-import {
-  background-color: #ef4444;
-}
+.bar-export { background-color: #10b981; }
+.bar-import { background-color: #ef4444; }
 
 .smart-consumption-section {
   display: flex; 
@@ -277,20 +242,80 @@ button {
   margin-top: 10px;
 }
 
-.advisor-description{
+.advisor-description {
   margin-top: 8px;
   color: var(--text-muted);
   font-size: 0.9rem;
 }
 
-@media (min-width: 600px) {
-  button {
-    width: auto;
-  }
+/* Card Insights & Controls Section */
+.insights-card {
+  margin-top: 20px;
 }
 
-button:hover {
-  background-color: var(--primary-hover);
+.insights-stats {
+  display: flex;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  margin-top: 10px;
+  font-size: 0.92rem;
+}
+
+.filter-section {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.filter-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-section label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.filter-control-input,
+.filter-control-select {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 4px 10px;
+  background-color: var(--badge-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-control-input:focus,
+.filter-control-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+}
+
+.filter-control-select option {
+  background-color: var(--card-bg);
+  color: var(--text-main);
+}
+
+.filtered-sources-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* Overview Metrics Grid */
@@ -299,18 +324,6 @@ button:hover {
   grid-template-columns: 1fr;
   gap: 16px;
   margin-bottom: 20px;
-}
-
-@media (min-width: 500px) {
-  .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 768px) {
-  .metrics-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
 }
 
 .metric-card {
@@ -358,7 +371,7 @@ button:hover {
 
 .timestamp-badge {
   font-size: 0.8rem;
-  background-color: #f1f5f9;
+  background-color: var(--badge-bg);
   padding: 4px 10px;
   border-radius: 12px;
   color: var(--text-muted);
@@ -380,6 +393,36 @@ button:hover {
   border-top: 1px dashed var(--border-color);
   padding-top: 12px;
   margin-top: 4px;
+}
+
+/* Media Queries Responsiveness */
+@media (max-width: 600px) {
+  .filter-section {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (min-width: 500px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 600px) {
+  button {
+    width: auto;
+  }
+  .action-card {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 /* Utility UI States */
@@ -406,7 +449,7 @@ button:hover {
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #e2e8f0;
+  border: 3px solid var(--border-color);
   border-top-color: var(--primary-color);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
