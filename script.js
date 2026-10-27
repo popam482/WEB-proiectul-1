@@ -62,12 +62,14 @@ const themeText = document.getElementById('theme-text');
 const savedTheme = localStorage.getItem('theme');
 const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
+// load the saved theme or system preference on page load
 if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
   applyTheme('dark');
 } else {
   applyTheme('light');
 }
 
+// change theme
 if (themeToggleBtn) {
   themeToggleBtn.addEventListener('click', () => {
     const isDark = document.body.classList.contains('dark-mode');
@@ -78,6 +80,7 @@ if (themeToggleBtn) {
   });
 }
 
+// apply new theme
 function applyTheme(theme) {
   if (theme === 'dark') {
     document.body.classList.add('dark-mode');
@@ -88,6 +91,7 @@ function applyTheme(theme) {
   }
 }
 
+// Update the width of a source's progress bar based on its MW value relative to total production
 function updateSourceBar(elementId, valueMw, totalProductionMw) {
   const barElement = document.getElementById(elementId);
   if (!barElement) return;
@@ -99,6 +103,7 @@ function updateSourceBar(elementId, valueMw, totalProductionMw) {
   barElement.style.width = `${percentage.toFixed(1)}%`;
 }
 
+// api function to fetch the current EUR to RON exchange rate (fallback value of 5.3 RON/EUR)
 async function fetchExchangeRate() {
   try {
     const response = await fetch('https://api.exchangerate-api.com/v4/latest/EUR');
@@ -110,6 +115,7 @@ async function fetchExchangeRate() {
   }
 }
 
+// api function to fetch the current energy price in EUR/MWh (fallback value of 100 EUR/MWh)
 async function fetchOpcomEnergyPrice() {
   const targetUrl = 'https://api.energy-charts.info/price?country=ro';
   const encodedTargetUrl = encodeURIComponent(targetUrl);
@@ -149,6 +155,7 @@ async function fetchOpcomEnergyPrice() {
   return 100.0;
 }
 
+// Render the balance widget based on the current balance and consumption values
 function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3, energyPriceEuro=100.0) {
   if (!balanceBadge) return;
 
@@ -204,6 +211,8 @@ function renderBalanceWidget(balanceMw, consumptionMw, euroToRon=5.3, energyPric
     balanceBar.style.width = '100%';
   }
 }
+
+// Update the grid insights section with the latest energy source data
 function updateGridInsights(senData) {
 
   currentSourcesData = [
@@ -234,6 +243,7 @@ function updateGridInsights(senData) {
   renderFilteredSources();
 }
 
+// Render the filtered list of energy sources based on user-selected criteria: MW threshold, category filter, and sort order
 function renderFilteredSources() {
   if (!filteredSourcesList) return;
 
@@ -287,14 +297,14 @@ function renderFilteredSources() {
   });
 }
 
-
+// Update the consumption advisor section based on current grid conditions: carbon intensity, green share, and balance
 function updateConsumptionAdvisor(senData, carbonIntensity) {
   if (!advisorBadge || !advisorTitle || !advisorDescription) return;
 
   const isLowCarbon = carbonIntensity < 220;
   const isHighGreen = senData.green_share_percent >= 45;
   const isSurplus = senData.balance_mw >= 0;
-  if (isLowCarbon && isHighGreen) {
+  if (isLowCarbon && isHighGreen && isSurplus) {
     advisorBadge.textContent = 'RECOMMENDED';
     advisorBadge.className = 'balance-badge badge-export';
     advisorTitle.textContent = 'Great time to use energy!';
@@ -319,6 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadGridData();
 });
 
+// Main function to load grid data, exchange rates, and energy prices, then render the dashboard
 async function loadGridData() {
   hideError();
   hideResults();
@@ -342,6 +353,7 @@ async function loadGridData() {
   }
 }
 
+// Fetch the HTML content of the grid data page using multiple CORS-enabled endpoints for reliability
 async function fetchGridHtml() {
   const targetUrl = 'https://www.sistemulenergetic.ro/';
   const encodedTargetUrl = encodeURIComponent(targetUrl);
@@ -411,6 +423,7 @@ function parseNumber(value) {
   return parseFloat(cleaned) || 0.0;
 }
 
+// Parse the HTML table from the grid data page and extract relevant energy metrics
 function parseSenHtml(htmlText) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlText, 'text/html');
@@ -467,6 +480,7 @@ function parseSenHtml(htmlText) {
   throw new Error('No valid hourly data row found in the grid table.');
 }
 
+// carbon intensity calculation based on the energy source mix and their respective emission factors
 function calculateGridCarbonIntensity(senData) {
   const totalProd = senData.production_mw;
   if (totalProd <= 0) return 300.0;
@@ -484,6 +498,7 @@ function calculateGridCarbonIntensity(senData) {
   return Number(intensity.toFixed(2));
 }
 
+// Render the main dashboard with the latest grid data, carbon intensity, and financial metrics
 function renderDashboard(data, intensity, euroToRon=5.3, energyPriceEuro=100.0) {
   resCarbon.textContent = intensity;
   resProduction.textContent = data.production_mw;
