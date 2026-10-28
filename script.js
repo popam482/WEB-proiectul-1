@@ -279,7 +279,7 @@ function renderFilteredSources() {
 
   filtered.forEach(source => {
     const li = document.createElement('li');
-    li.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--badge-bg); border-radius: 6px; font-size: 0.88rem;';
+    li.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--badge-bg); border-radius: 6px; font-size: 0.88rem; margin-bottom: 10px;';
 
     const typeBadgeColor = source.type === 'fossil' ? '#b91c1c' : (source.type === 'green' ? '#15803d' : '#0284c7');
 
